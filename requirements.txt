@@ -1,0 +1,12 @@
+streamlit
+requests
+pandas
+numpy
+pdfplumber
+python-pptx
+python-docx
+sentence-transformers
+torch
+transformers
+faiss-cpu
+langchain
