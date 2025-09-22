@@ -143,7 +143,6 @@ class LLMResponseAgent:
             ctx_preview = "; ".join([f"{c['meta'].get('source')}#{c['meta'].get('chunk_index')}" for c in retrieved[:5]])
             _log(f"Context preview: {ctx_preview}")
 
-            # build prompt (compact)
             prompt_parts = [
                 "You are a helpful assistant. Use ONLY the provided context to answer the question.",
                 f"QUESTION: {query}",
@@ -156,12 +155,10 @@ class LLMResponseAgent:
             prompt = "\n\n".join(prompt_parts)
 
             answer = self.call_ollama(prompt)
-            # ensure non-empty answer
             if answer is None or (isinstance(answer, str) and not answer.strip()):
                 _log("Ollama returned empty/whitespace; replacing with placeholder message.")
                 answer = "[Ollama returned no usable answer.]"
 
-            # preview log
             answer_str = str(answer)
             preview = answer_str[:200].replace("\n", " ")
             _log(f"Ollama returned {len(answer_str)} chars. Preview: {preview}")

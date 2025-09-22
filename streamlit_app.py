@@ -15,7 +15,6 @@ def _log_ui(msg: str):
     print(f"[{datetime.now().isoformat()}] [UI] {msg}", flush=True)
 
 def sanitize_text(text: str) -> str:
-    """Remove script/style blocks and HTML tags; return cleaned or original trimmed text."""
     if text is None:
         return ""
     if not isinstance(text, str):
@@ -27,7 +26,6 @@ def sanitize_text(text: str) -> str:
     return cleaned if cleaned else text.strip()
 
 def sanitize_history():
-    """Sanitize stored messages and drop tag-only entries (like '</div>')."""
     if "messages" not in st.session_state:
         return
     new_msgs = []
@@ -45,7 +43,6 @@ def sanitize_history():
         new_msgs.append(new_msg)
     st.session_state.messages = new_msgs
 
-# ---------- Session State Initialization ----------
 def init_session_state():
     if "queues" not in st.session_state:
         st.session_state.queues = {
@@ -143,7 +140,7 @@ def handle_chat_input(mcp_broker):
                 placeholder.markdown(html_lib.escape(ans_str))
 
             append_assistant(answer, sources=retrieved)
-        st.experimental_rerun()
+        st.rerun()
 
 
 # ---------- Main ----------
