@@ -75,11 +75,11 @@ class RetrievalAgent:
         else:
             final = candidates[:self.K_RERANK]
         top_chunks = [{'text': c['text'], 'meta': c['meta'], 'score': c.get('rerank_score', c.get('score'))} for c in final]
-        _log(f"Returning {len(top_chunks)} top chunks to LLMResponseAgent (trace={trace})")
+        _log(f"Returning {len(top_chunks)} top chunks to MCP Broker (trace={trace})")
         resp = {
-            'type': 'RETRIEVAL_RESULT',
+            'type': 'RETRIEVAL_COMPLETE',
             'sender': 'RetrievalAgent',
-            'receiver': 'LLMResponseAgent',
+            'receiver': 'MCPBroker',
             'trace_id': trace,
             'payload': {'retrieved_context': top_chunks, 'query': query}
         }

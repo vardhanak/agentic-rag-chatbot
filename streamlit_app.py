@@ -55,7 +55,7 @@ def init_session_state():
         st.session_state.messages = []
         st.session_state.messages.append({
             "role": "assistant",
-            "text": "Hello, Please upload documents in supported documents.",
+            "text": "Hello, Please upload documents in supported formats.",
             "sources": []
         })
     else:

@@ -145,6 +145,24 @@ class MCPBroker:
                                 _log(f"Auto-forwarded {len(chunks)} chunks to RetrievalAgent (trace={msg.get('trace_id')})")
                             except Exception as e:
                                 _log(f"Failed to auto-forward chunks to RetrievalAgent: {e}")
+                        
+                    if msg.get('type') == 'RETRIEVAL_COMPLETE':
+                        top_chunks = msg['payload']['retrieved_context']
+                        query = msg['payload']['query']
+                        trace = msg.get('trace_id')
+                        if chunks:
+                            forward_msg = {
+                                'type': 'RETRIEVAL_RESULT',
+                                'sender': 'MCPBroker',
+                                'receiver': 'LLMResponseAgent',
+                                'trace_id': trace,
+                                'payload': {'retrieved_context': top_chunks, 'query': query}
+                            }
+                            try:
+                                in_map['LLMResponseAgent'].put(forward_msg)
+                                _log(f"Auto-forwarded {len(chunks)} chunks to LLMResponseAgent (trace={msg.get('trace_id')})")
+                            except Exception as e:
+                                _log(f"Failed to auto-forward chunks to LLMResponseAgent: {e}")
                 except Exception as e:
                     _log(f"Error during routing: {e}")
 
@@ -205,19 +223,6 @@ class MCPBroker:
                     if resp.get("type") == "INGESTION_COMPLETE" and resp.get("trace_id") == trace_id:
                         chunks = resp["payload"].get("chunks", [])
                         _log(f"INGESTION_COMPLETE: got {len(chunks)} chunks (trace={trace_id})")
-                        if chunks:
-                            forward_msg = {
-                                "type": "CHUNKS_ADD",
-                                "sender": "MCPBroker",
-                                "receiver": "RetrievalAgent",
-                                "trace_id": trace_id,
-                                "payload": {"chunks": chunks},
-                            }
-                            try:
-                                self.ret_in.put(forward_msg)
-                                _log(f"Forwarded {len(chunks)} chunks to RetrievalAgent (trace={trace_id})")
-                            except Exception as e:
-                                _log(f"Failed to forward chunks to RetrievalAgent: {e}")
                         return resp
                     else:
                         _log(f"Ignoring ingestion message type={resp.get('type')} trace={resp.get('trace_id')}")
@@ -247,7 +252,7 @@ class MCPBroker:
                     llm_msg = self.llm_out_public.get(timeout=0.5)
                     _log(f"Got message from llm_out: type={llm_msg.get('type')} trace={llm_msg.get('trace_id')}")
                     if llm_msg.get("type") == "LLM_ANSWER" and llm_msg.get("trace_id") == trace_id:
-                        _log("Received matching LLM_ANSWER -> returning")
+                        _log("Received matching LLM_ANSWER -> returning to UI")
                         return llm_msg
                     else:
                         _log(f"Ignoring llm_out message type={llm_msg.get('type')} trace={llm_msg.get('trace_id')}")
